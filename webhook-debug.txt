@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-11-21T18:20:12.468Z",
+  "body": {
+    "event": "messages.update",
+    "instance": "5511956759223",
+    "data": {
+      "keyId": "3EB07D2900B3A08A4012F2",
+      "remoteJid": "272215144673366:13@lid",
+      "fromMe": true,
+      "status": "DELIVERY_ACK",
+      "instanceId": "10516e44-72bb-4f9e-9f2d-32e9b7f4e5ef"
+    },
+    "destination": "https://3000-i9eazc49dkftpwcqj2k2o-d0327918.manusvm.computer/api/webhook/gti",
+    "date_time": "2025-11-21T15:20:12.355Z",
+    "sender": "5511956759223@s.whatsapp.net",
+    "server_url": "https://apivip.gti-api.com",
+    "apikey": "15C1EE8A-34D4-4199-8A5E-489EB128C362"
+  },
+  "headers": {
+    "host": "3000-i9eazc49dkftpwcqj2k2o-d0327918.manusvm.computer",
+    "x-real-ip": "172.16.1.203",
+    "content-length": "485",
+    "user-agent": "axios/1.12.2",
+    "accept": "application/json, text/plain, */*",
+    "accept-encoding": "gzip, compress, deflate, br",
+    "content-type": "application/json",
+    "x-amzn-trace-id": "Root=1-6920ad5c-7ea0b4d2570eadfa46e52fec",
+    "x-forwarded-for": "62.146.225.154, 172.16.0.103",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https"
+  },
+  "query": {}
+}

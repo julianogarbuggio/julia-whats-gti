@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-11-21T18:25:29.354Z",
+  "body": {
+    "isStatusReply": false,
+    "chatLid": "145681146724576@lid",
+    "connectedPhone": "5511956759223",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": false,
+    "isNewsletter": false,
+    "instanceId": "3E9D34376337516C1260CEE0FE05F6ED",
+    "messageId": "3EB0EE11CFE2A28A9CB7DC",
+    "phone": "554499869223",
+    "fromMe": false,
+    "momment": 1763749523000,
+    "status": "RECEIVED",
+    "chatName": "Juliano Garbuggio",
+    "senderPhoto": null,
+    "senderName": "Juliano Garbuggio",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/508506678_769356099085609_8412736343955444277_n.jpg?ccb=11-4&oh=01_Q5Aa3AGPjyvIpQGAmFhbuvuLOb9Ko-atyhNIUX0z4OIcw1MvCA&oe=692DDC51&_nc_sid=5e03e0&_nc_cat=107",
+    "broadcast": false,
+    "participantLid": null,
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "text": {
+      "message": "Teste Z-API"
+    },
+    "_traceContext": {
+      "traceId": "adf922bbeaa7c747e693b7430056d218",
+      "spanId": "14ff484ae4d86b78"
+    }
+  },
+  "headers": {
+    "host": "3000-i9eazc49dkftpwcqj2k2o-d0327918.manusvm.computer",
+    "x-real-ip": "172.16.0.147",
+    "content-length": "873",
+    "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+    "accept-encoding": "gzip",
+    "content-type": "application/json; charset=utf-8",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "x-amzn-trace-id": "Root=1-6920ae99-4a7ae95064e8c8fa3bd658df",
+    "x-forwarded-for": "168.75.98.157, 172.16.1.136",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https",
+    "z-api-token": "D6E8A4FB312F8FE76C3C6508"
+  },
+  "query": {}
+}

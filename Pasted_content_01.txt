@@ -1,0 +1,157 @@
+# datajud_client.py
+import os
+from enum import Enum
+from typing import Any, Dict, Optional
+
+import httpx
+
+
+DATAJUD_BASE_URL = "https://api-publica.datajud.cnj.jus.br"
+DATAJUD_API_KEY = os.getenv("DATAJUD_API_KEY")
+
+
+class TribunalDatajud(str, Enum):
+    """Tribunais estaduais que vamos usar de início.
+    Depois é só acrescentar os outros (tjrs, tjrj, tjgo, etc.)."""
+    TJPR = "tjpr"
+    TJSP = "tjsp"
+    TJMG = "tjmg"
+
+
+class DatajudClient:
+    def __init__(self, api_key: Optional[str] = None) -> None:
+        self.api_key = api_key or DATAJUD_API_KEY
+        if not self.api_key:
+            raise RuntimeError(
+                "DATAJUD_API_KEY não configurada. "
+                "Defina a variável de ambiente DATAJUD_API_KEY."
+            )
+
+    @property
+    def _headers(self) -> Dict[str, str]:
+        # Formato recomendado: Authorization: APIKey <chave>
+        return {
+            "Authorization": f"APIKey {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+    @staticmethod
+    def _build_endpoint(tribunal: TribunalDatajud) -> str:
+        # Ex.: https://api-publica.datajud.cnj.jus.br/api_publica_tjpr/_search
+        return f"{DATAJUD_BASE_URL}/api_publica_{tribunal.value}/_search"
+
+    @staticmethod
+    def _build_query_by_cnj(numero_cnj: str) -> Dict[str, Any]:
+        """
+        Monta a query em Elasticsearch DSL para filtrar pelo numeroProcesso exato.
+
+        A documentação e exemplos (tutoriais e notebooks) mostram que o campo
+        numeroProcesso é o identificador principal do processo no DataJud.  [oai_citation:3‡Conselho Nacional de Justiça](https://www.cnj.jus.br/wp-content/uploads/2023/05/tutorial-api-publica-datajud-beta.pdf?utm_source=chatgpt.com)
+        """
+        # Remover pontuação do CNJ, se vier formatado
+        numero_limpo = (
+            numero_cnj.replace("-", "")
+            .replace(".", "")
+            .replace("_", "")
+            .strip()
+        )
+
+        # Query básica: filtro por numeroProcesso exato
+        return {
+            "size": 10,
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"term": {"numeroProcesso": numero_limpo}}
+                    ]
+                }
+            },
+            "sort": [
+                {"dataHoraUltimaAtualizacao": {"order": "desc"}}
+            ],
+        }
+
+    def consultar_por_cnj(
+        self,
+        numero_cnj: str,
+        tribunal: TribunalDatajud,
+    ) -> Dict[str, Any]:
+        """
+        Consulta a API Pública do DataJud pelo número CNJ em um tribunal específico.
+
+        Retorna o JSON bruto da API (para ser tratado em outro lugar).
+        """
+        import json
+
+        endpoint = self._build_endpoint(tribunal)
+        body = self._build_query_by_cnj(numero_cnj)
+
+        with httpx.Client(timeout=30.0) as client:
+            resp = client.post(
+                endpoint,
+                headers=self._headers,
+                json=body,
+            )
+
+        resp.raise_for_status()
+        data = resp.json()
+        return data
+
+    @staticmethod
+    def extrair_primeiro_resultado(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Pega o primeiro 'hit' da resposta do DataJud (se existir) e devolve o _source.
+        """
+        hits = data.get("hits", {}).get("hits", [])
+        if not hits:
+            return None
+        return hits[0].get("_source") or {}
+
+    @staticmethod
+    def montar_resumo_processo(source: Dict[str, Any]) -> str:
+        """
+        Transforma o _source do DataJud em um texto amigável pro WhatsApp.
+        Campos comuns na documentação: numeroProcesso, classe, tribunal, grau,
+        dataAjuizamento, dataHoraUltimaAtualizacao, movimentos, orgaoJulgador, assuntos.  [oai_citation:4‡Google Colab](https://colab.research.google.com/github/jespimentel/api_cnj/blob/main/anpp.ipynb/?utm_source=chatgpt.com)
+        """
+        if not source:
+            return "Nenhum dado encontrado para este processo na API Pública do DataJud."
+
+        numero = source.get("numeroProcesso", "N/D")
+        classe = (source.get("classe") or {}).get("nome", "N/D")
+        tribunal = source.get("tribunal", "N/D")
+        grau = source.get("grau", "N/D")
+        data_ajuizamento = source.get("dataAjuizamento", "N/D")
+        ultima_atualizacao = source.get("dataHoraUltimaAtualizacao", "N/D")
+
+        orgao = (source.get("orgaoJulgador") or {}).get("nome", "N/D")
+
+        # assuntos é uma lista de dicts com 'nome'
+        assuntos_raw = source.get("assuntos") or []
+        assuntos_nomes = [a.get("nome") for a in assuntos_raw if isinstance(a, dict)]
+        assuntos_str = ", ".join(assuntos_nomes) if assuntos_nomes else "N/D"
+
+        # movimentos pode ser grande; aqui pegamos só o último
+        movimentos = source.get("movimentos") or []
+        ultimo_mov = movimentos[-1] if movimentos else None
+        if ultimo_mov:
+            mov_nome = ultimo_mov.get("nome", "N/D")
+            mov_data = ultimo_mov.get("dataHora", "N/D")
+            resumo_mov = f"{mov_data} – {mov_nome}"
+        else:
+            resumo_mov = "Nenhuma movimentação encontrada (ou não disponibilizada)."
+
+        msg = (
+            f"🔎 *Consulta DataJud*\n\n"
+            f"*Número CNJ:* {numero}\n"
+            f"*Tribunal:* {tribunal} | *Grau:* {grau}\n"
+            f"*Órgão julgador:* {orgao}\n"
+            f"*Classe:* {classe}\n"
+            f"*Assuntos:* {assuntos_str}\n"
+            f"*Data de ajuizamento:* {data_ajuizamento}\n"
+            f"*Última atualização:* {ultima_atualizacao}\n\n"
+            f"*Última movimentação conhecida:*\n"
+            f"{resumo_mov}"
+        )
+
+        return msg

@@ -1,0 +1,336 @@
+{
+  "chatbot_name": "Jul.IA - Assistente de WhatsApp",
+  "version": "1.0.0",
+  "message_blocks": [
+    {
+      "block_id": "welcome_001",
+      "step": "welcome",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Olá! 👋 Seja bem-vindo(a)!\n\nSou a **Jul.IA**, assistente virtual do escritório de advocacia especializado em **Direito do Consumidor** e **Revisão de Empréstimos Bancários**.\n\nEstou aqui para ajudar você a entender se tem direito a revisar seu empréstimo e recuperar valores pagos indevidamente.\n\nPosso fazer algumas perguntas para entender melhor sua situação?",
+        "buttons": [
+          {"id": "sim_continuar", "label": "Sim, vamos lá!"},
+          {"id": "nao_agora", "label": "Não, obrigado"},
+          {"id": "falar_humano", "label": "Falar com advogado"}
+        ]
+      }
+    },
+    {
+      "block_id": "get_name_002",
+      "step": "get_name",
+      "type": "text_input",
+      "content": {
+        "text": "Perfeito! Para começar, qual é o seu **nome completo**?",
+        "expected_input": "text",
+        "validation": "nome_completo",
+        "save_to": "cliente_nome"
+      }
+    },
+    {
+      "block_id": "get_email_003",
+      "step": "get_email",
+      "type": "text_input",
+      "content": {
+        "text": "Obrigada, {{cliente_nome}}! 😊\n\nAgora, qual é o seu **e-mail**?",
+        "expected_input": "email",
+        "validation": "email_format",
+        "save_to": "cliente_email"
+      }
+    },
+    {
+      "block_id": "loan_type_005",
+      "step": "loan_type",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Agora vamos falar sobre seu empréstimo. 💰\n\nVocê possui ou possuiu algum **empréstimo consignado**?\n\n_(Empréstimo consignado é aquele descontado diretamente da folha de pagamento ou benefício do INSS)_",
+        "buttons": [
+          {"id": "sim_consignado", "label": "Sim, consignado"},
+          {"id": "nao_consignado", "label": "Não, outro tipo"},
+          {"id": "nao_sei", "label": "Não sei"}
+        ]
+      }
+    },
+    {
+      "block_id": "explain_consignado_005a",
+      "step": "explain_consignado",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Sem problemas! Vou explicar:\n\n**Empréstimo Consignado** é aquele em que as parcelas são descontadas **automaticamente** do seu salário, aposentadoria ou benefício do INSS.\n\nVocê se lembra se as parcelas eram descontadas direto da sua folha de pagamento?",
+        "buttons": [
+          {"id": "sim_desconto_folha", "label": "Sim, era descontado"},
+          {"id": "nao_desconto_folha", "label": "Não, eu pagava"},
+          {"id": "ainda_nao_sei", "label": "Ainda não sei"}
+        ]
+      }
+    },
+    {
+      "block_id": "loan_status_006",
+      "step": "loan_status",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Entendi! E esse empréstimo consignado está:",
+        "buttons": [
+          {"id": "ativo", "label": "Ativo (ainda pagando)"},
+          {"id": "encerrado", "label": "Encerrado (já paguei tudo)"},
+          {"id": "refinanciado", "label": "Refinanciado (mata-mata)"}
+        ]
+      }
+    },
+    {
+      "block_id": "bank_name_007",
+      "step": "bank_name",
+      "type": "text_input",
+      "content": {
+        "text": "Qual é o **banco** do seu empréstimo consignado?",
+        "expected_input": "text",
+        "save_to": "banco_nome",
+        "examples": ["Banco do Brasil", "Caixa Econômica", "Bradesco", "Itaú", "Santander"]
+      }
+    },
+    {
+      "block_id": "installment_value_008",
+      "step": "installment_value",
+      "type": "text_input",
+      "content": {
+        "text": "Qual é o **valor aproximado das parcelas** que você paga/pagava?",
+        "expected_input": "currency",
+        "validation": "valor_monetario",
+        "save_to": "valor_parcela",
+        "examples": ["R$ 350,00", "R$ 500", "350 reais"]
+      }
+    },
+    {
+      "block_id": "installment_count_009",
+      "step": "installment_count",
+      "type": "text_input",
+      "content": {
+        "text": "Quantas **parcelas** ao todo você contratou?",
+        "expected_input": "number",
+        "validation": "numero_inteiro",
+        "save_to": "numero_parcelas",
+        "examples": ["60", "72", "84", "96"]
+      }
+    },
+    {
+      "block_id": "contract_period_010",
+      "step": "contract_period",
+      "type": "text_input",
+      "content": {
+        "text": "Quando você **contratou** esse empréstimo? (mês e ano aproximados)",
+        "expected_input": "date_approximate",
+        "validation": "data_aproximada",
+        "save_to": "periodo_contrato",
+        "examples": ["Janeiro de 2023", "03/2022", "Junho/2021"]
+      }
+    },
+    {
+      "block_id": "contract_number_011",
+      "step": "contract_number",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Você tem em mãos o **número do contrato** ou algum documento do empréstimo?\n\nSe tiver, pode me enviar o número ou uma foto do documento. Se não tiver, sem problemas!",
+        "buttons": [
+          {"id": "tenho_contrato", "label": "Tenho o número"},
+          {"id": "nao_tenho", "label": "Não tenho agora"}
+        ]
+      }
+    },
+    {
+      "block_id": "qualified_positive_013",
+      "step": "qualified_positive",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "✅ **Ótima notícia!**\n\nCom base nas informações fornecidas, identificamos que você **pode ter direito** à revisão do seu empréstimo consignado!\n\nMuitos clientes conseguem:\n• Reduzir o valor das parcelas\n• Recuperar valores pagos indevidamente\n• Cancelar juros abusivos\n• Obter devolução de taxas indevidas\n\n**O que você gostaria de fazer agora?**",
+        "buttons": [
+          {"id": "agendar_atendimento", "label": "Agendar atendimento"},
+          {"id": "enviar_documentos", "label": "Enviar documentos agora"},
+          {"id": "mais_informacoes", "label": "Quero mais informações"}
+        ]
+      }
+    },
+    {
+      "block_id": "schedule_appointment_014",
+      "step": "schedule_appointment",
+      "type": "text_input",
+      "content": {
+        "text": "Perfeito! Vou agendar um atendimento com nosso advogado especializado. 📅\n\nQual **dia e horário** seria melhor para você?\n\nNosso horário de atendimento é de segunda a sexta, das 9h às 18h.",
+        "expected_input": "text",
+        "save_to": "preferencia_agendamento",
+        "examples": ["Segunda-feira às 14h", "Terça de manhã", "Quarta-feira 10h"]
+      }
+    },
+    {
+      "block_id": "appointment_confirmation_014a",
+      "step": "appointment_confirmation",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "✅ **Agendamento registrado!**\n\nNosso advogado entrará em contato com você em breve para confirmar o horário.\n\nEnquanto isso, você pode já ir **separando os documentos** do seu empréstimo (contrato, extratos, comprovantes de pagamento).\n\nVocê também receberá um link para preencher uma ficha mais detalhada. Tudo bem?",
+        "buttons": [
+          {"id": "ok_aguardar", "label": "Ok, vou aguardar"},
+          {"id": "enviar_docs_agora", "label": "Enviar documentos agora"}
+        ]
+      }
+    },
+    {
+      "block_id": "send_documents_015",
+      "step": "send_documents",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Excelente! Para agilizar seu atendimento, vou enviar um **link** onde você pode:\n\n✅ Preencher seus dados completos\n✅ Fazer upload dos documentos do empréstimo\n✅ Assinar a procuração digitalmente (via ZapSign)\n\nTudo de forma **rápida, segura e online**!\n\nVou enviar o link agora. Ok?",
+        "buttons": [
+          {"id": "sim_enviar_link", "label": "Sim, pode enviar!"}
+        ]
+      }
+    },
+    {
+      "block_id": "send_form_link_015a",
+      "step": "send_form_link",
+      "type": "text_with_link",
+      "content": {
+        "text": "📎 **Link do formulário:**\n{{form_link}}\n\nPreencha com calma e, se tiver dúvidas, é só me chamar!\n\nApós preencher, você receberá a procuração para assinar digitalmente pelo ZapSign.\n\n⚠️ **Importante:** Ao preencher o formulário e assinar a procuração, você autoriza nosso escritório a analisar seu contrato bancário e representá-lo judicialmente, se necessário.",
+        "link_variable": "form_link",
+        "link_example": "http://formulario.julianogarbuggio.adv.br/?lead_id=12345"
+      }
+    },
+    {
+      "block_id": "more_info_016",
+      "step": "more_info",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "Claro! Vou explicar melhor sobre nosso serviço de **Revisão de Empréstimos Consignados**:\n\n**O que é?**\nÉ a análise do seu contrato de empréstimo para identificar cobranças indevidas, juros abusivos, taxas ilegais e outras irregularidades.\n\n**Quando é cabível?**\n• Empréstimos consignados com juros acima do permitido\n• Cobranças de taxas não autorizadas\n• Refinanciamentos (\"mata-mata\") sem seu consentimento\n• Descontos indevidos na folha de pagamento\n\n**O que você precisa?**\n• Contrato do empréstimo\n• Extratos bancários\n• Comprovantes de pagamento\n• Documento de identidade e CPF\n\n**Quanto custa?**\nTrabalhamos com **honorários de êxito**: você só paga se ganharmos a causa!\n\nNosso percentual é acordado no contrato de honorários.\n\n**Quanto tempo demora?**\nA análise inicial leva de 3 a 5 dias úteis. O processo judicial pode levar de 6 meses a 2 anos, dependendo do caso.\n\nFicou mais claro? O que você gostaria de fazer agora?",
+        "buttons": [
+          {"id": "agendar_pos_info", "label": "Agendar atendimento"},
+          {"id": "enviar_docs_pos_info", "label": "Enviar documentos"},
+          {"id": "falar_advogado_pos_info", "label": "Falar com advogado"}
+        ]
+      }
+    },
+    {
+      "block_id": "non_consigned_loan_020",
+      "step": "non_consigned_loan",
+      "type": "text_input",
+      "content": {
+        "text": "Entendi! Você mencionou que seu empréstimo **não é consignado**.\n\nNosso escritório é especializado principalmente em **empréstimos consignados**, mas também atendemos outros casos de direito do consumidor.\n\nQual tipo de empréstimo ou problema você tem?",
+        "expected_input": "text",
+        "save_to": "tipo_problema",
+        "examples": ["Empréstimo pessoal", "Cartão de crédito", "Financiamento de veículo", "Problema com banco"]
+      }
+    },
+    {
+      "block_id": "analyze_other_case_021",
+      "step": "analyze_other_case",
+      "type": "text",
+      "content": {
+        "text": "Obrigada pelas informações, {{cliente_nome}}!\n\nVou encaminhar seu caso para um de nossos advogados analisar se podemos ajudar.\n\nUm advogado entrará em contato com você em breve pelo WhatsApp ou e-mail.\n\nEnquanto isso, se tiver documentos relacionados ao seu caso, pode já ir separando!",
+        "action": "forward_to_human_specialist"
+      }
+    },
+    {
+      "block_id": "success_end_097",
+      "step": "success_end",
+      "type": "text",
+      "content": {
+        "text": "🎉 **Tudo certo!**\n\nSuas informações foram registradas e em breve você terá retorno da nossa equipe.\n\nSe precisar de algo, é só me chamar novamente!\n\n**Escritório de Advocacia - Direito do Consumidor**\n📧 juliano@garbuggio.com.br\n📱 WhatsApp: (número do escritório)\n\nTenha um ótimo dia! 😊",
+        "end_conversation": true
+      }
+    },
+    {
+      "block_id": "forward_to_human_098",
+      "step": "forward_to_human",
+      "type": "text",
+      "content": {
+        "text": "Sem problemas! Vou encaminhar você para um **atendimento humano** com nosso advogado ou assistente.\n\nAguarde um momento, alguém da equipe entrará em contato com você em breve!\n\n📱 Se preferir, você também pode ligar diretamente para nosso escritório.",
+        "action": "notify_human_agent"
+      }
+    },
+    {
+      "block_id": "user_declined_099",
+      "step": "user_declined",
+      "type": "text",
+      "content": {
+        "text": "Sem problemas! Entendo perfeitamente.\n\nSe mudar de ideia ou tiver dúvidas sobre **revisão de empréstimos** ou **direito do consumidor**, é só me chamar novamente!\n\nEstou sempre por aqui. 😊\n\nTenha um ótimo dia!",
+        "end_conversation": true
+      }
+    },
+    {
+      "block_id": "lgpd_consent",
+      "step": "lgpd_consent",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "⚠️ **Proteção de Dados Pessoais (LGPD)**\n\nAo continuar esta conversa e fornecer seus dados, você autoriza o escritório de advocacia a coletar, armazenar e processar suas informações pessoais exclusivamente para:\n\n✅ Análise de viabilidade do seu caso\n✅ Comunicação sobre serviços jurídicos\n✅ Elaboração de documentos e procurações\n✅ Representação jurídica, se contratado\n\nSeus dados serão tratados com total confidencialidade e segurança, conforme a Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018).\n\nVocê concorda com estes termos?",
+        "buttons": [
+          {"id": "aceito_lgpd", "label": "Sim, concordo"},
+          {"id": "nao_aceito_lgpd", "label": "Não concordo"}
+        ]
+      }
+    },
+    {
+      "block_id": "contract_analysis_consent",
+      "step": "contract_analysis_consent",
+      "type": "text_with_buttons",
+      "content": {
+        "text": "📄 **Autorização para Análise de Contrato Bancário**\n\nPara prosseguir com a análise do seu empréstimo, preciso da sua autorização para:\n\n✅ Analisar seu contrato bancário\n✅ Solicitar documentos e extratos\n✅ Verificar cobranças e taxas\n✅ Identificar possíveis irregularidades\n\nVocê autoriza a análise do seu contrato bancário?",
+        "buttons": [
+          {"id": "autorizo_analise", "label": "Sim, autorizo"},
+          {"id": "nao_autorizo", "label": "Não autorizo"}
+        ]
+      }
+    }
+  ],
+  "conversation_examples": [
+    {
+      "example_id": "conversation_001",
+      "scenario": "Lead qualificado - Empréstimo consignado ativo",
+      "messages": [
+        {"from": "bot", "text": "Olá! 👋 Seja bem-vindo(a)!\n\nSou a **Jul.IA**, assistente virtual do escritório de advocacia especializado em **Direito do Consumidor** e **Revisão de Empréstimos Bancários**.\n\nEstou aqui para ajudar você a entender se tem direito a revisar seu empréstimo e recuperar valores pagos indevidamente.\n\nPosso fazer algumas perguntas para entender melhor sua situação?"},
+        {"from": "user", "text": "Sim, vamos lá!"},
+        {"from": "bot", "text": "Perfeito! Para começar, qual é o seu **nome completo**?"},
+        {"from": "user", "text": "Maria da Silva Santos"},
+        {"from": "bot", "text": "Obrigada, Maria da Silva Santos! 😊\n\nAgora, qual é o seu **e-mail**?"},
+        {"from": "user", "text": "maria.santos@email.com"},
+        {"from": "bot", "text": "Ótimo! Confirme seu número de **WhatsApp** para contato:\n\nÉ este número: (11) 98765-4321?"},
+        {"from": "user", "text": "Sim, está correto"},
+        {"from": "bot", "text": "Agora vamos falar sobre seu empréstimo. 💰\n\nVocê possui ou possuiu algum **empréstimo consignado**?\n\n_(Empréstimo consignado é aquele descontado diretamente da folha de pagamento ou benefício do INSS)_"},
+        {"from": "user", "text": "Sim, consignado"},
+        {"from": "bot", "text": "Entendi! E esse empréstimo consignado está:"},
+        {"from": "user", "text": "Ativo (ainda pagando)"},
+        {"from": "bot", "text": "Qual é o **banco** do seu empréstimo consignado?"},
+        {"from": "user", "text": "Banco do Brasil"},
+        {"from": "bot", "text": "Qual é o **valor aproximado das parcelas** que você paga/pagava?"},
+        {"from": "user", "text": "R$ 450,00"},
+        {"from": "bot", "text": "Quantas **parcelas** ao todo você contratou?"},
+        {"from": "user", "text": "84"},
+        {"from": "bot", "text": "Quando você **contratou** esse empréstimo? (mês e ano aproximados)"},
+        {"from": "user", "text": "Janeiro de 2022"},
+        {"from": "bot", "text": "Você tem em mãos o **número do contrato** ou algum documento do empréstimo?\n\nSe tiver, pode me enviar o número ou uma foto do documento. Se não tiver, sem problemas!"},
+        {"from": "user", "text": "Não tenho agora"},
+        {"from": "bot", "text": "Perfeito, Maria da Silva Santos! 📋\n\nEstou analisando as informações que você me passou...\n\n_(processando)_"},
+        {"from": "bot", "text": "✅ **Ótima notícia!**\n\nCom base nas informações fornecidas, identificamos que você **pode ter direito** à revisão do seu empréstimo consignado!\n\nMuitos clientes conseguem:\n• Reduzir o valor das parcelas\n• Recuperar valores pagos indevidamente\n• Cancelar juros abusivos\n• Obter devolução de taxas indevidas\n\n**O que você gostaria de fazer agora?**"},
+        {"from": "user", "text": "Agendar atendimento"},
+        {"from": "bot", "text": "Perfeito! Vou agendar um atendimento com nosso advogado especializado. 📅\n\nQual **dia e horário** seria melhor para você?\n\nNosso horário de atendimento é de segunda a sexta, das 9h às 18h."},
+        {"from": "user", "text": "Terça-feira às 14h"},
+        {"from": "bot", "text": "✅ **Agendamento registrado!**\n\nNosso advogado entrará em contato com você em breve para confirmar o horário.\n\nEnquanto isso, você pode já ir **separando os documentos** do seu empréstimo (contrato, extratos, comprovantes de pagamento).\n\nVocê também receberá um link para preencher uma ficha mais detalhada. Tudo bem?"},
+        {"from": "user", "text": "Ok, vou aguardar"},
+        {"from": "bot", "text": "🎉 **Tudo certo!**\n\nSuas informações foram registradas e em breve você terá retorno da nossa equipe.\n\nSe precisar de algo, é só me chamar novamente!\n\n**Escritório de Advocacia - Direito do Consumidor**\n📧 juliano@garbuggio.com.br\n📱 WhatsApp: (número do escritório)\n\nTenha um ótimo dia! 😊"}
+      ]
+    },
+    {
+      "example_id": "conversation_002",
+      "scenario": "Lead não qualificado - Empréstimo não consignado",
+      "messages": [
+        {"from": "bot", "text": "Olá! 👋 Seja bem-vindo(a)!\n\nSou a **Jul.IA**, assistente virtual do escritório de advocacia especializado em **Direito do Consumidor** e **Revisão de Empréstimos Bancários**.\n\nEstou aqui para ajudar você a entender se tem direito a revisar seu empréstimo e recuperar valores pagos indevidamente.\n\nPosso fazer algumas perguntas para entender melhor sua situação?"},
+        {"from": "user", "text": "Sim"},
+        {"from": "bot", "text": "Perfeito! Para começar, qual é o seu **nome completo**?"},
+        {"from": "user", "text": "João Pedro Oliveira"},
+        {"from": "bot", "text": "Obrigada, João Pedro Oliveira! 😊\n\nAgora, qual é o seu **e-mail**?"},
+        {"from": "user", "text": "joao.oliveira@gmail.com"},
+        {"from": "bot", "text": "Agora vamos falar sobre seu empréstimo. 💰\n\nVocê possui ou possuiu algum **empréstimo consignado**?\n\n_(Empréstimo consignado é aquele descontado diretamente da folha de pagamento ou benefício do INSS)_"},
+        {"from": "user", "text": "Não, outro tipo"},
+        {"from": "bot", "text": "Entendi! Você mencionou que seu empréstimo **não é consignado**.\n\nNosso escritório é especializado principalmente em **empréstimos consignados**, mas também atendemos outros casos de direito do consumidor.\n\nQual tipo de empréstimo ou problema você tem?"},
+        {"from": "user", "text": "Tenho um problema com cartão de crédito, estão cobrando juros muito altos"},
+        {"from": "bot", "text": "Obrigada pelas informações, João Pedro Oliveira!\n\nVou encaminhar seu caso para um de nossos advogados analisar se podemos ajudar.\n\nUm advogado entrará em contato com você em breve pelo WhatsApp ou e-mail.\n\nEnquanto isso, se tiver documentos relacionados ao seu caso, pode já ir separando!"},
+        {"from": "bot", "text": "🎉 **Tudo certo!**\n\nSuas informações foram registradas e em breve você terá retorno da nossa equipe.\n\nSe precisar de algo, é só me chamar novamente!\n\n**Escritório de Advocacia - Direito do Consumidor**\n📧 juliano@garbuggio.com.br\n📱 WhatsApp: (número do escritório)\n\nTenha um ótimo dia! 😊"}
+      ]
+    }
+  ]
+}

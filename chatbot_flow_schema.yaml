@@ -1,0 +1,584 @@
+name: "Jul.IA - Assistente de WhatsApp"
+version: "1.0.0"
+description: "Chatbot para qualificação de leads em revisão de empréstimos bancários"
+
+# ============================================
+# CONFIGURAÇÕES GERAIS
+# ============================================
+settings:
+  language: "pt-BR"
+  tone: "profissional, acessível, sem jargão excessivo"
+  specialty: "Direito do Consumidor - Revisão de Empréstimos Bancários"
+  response_time: "imediato"
+  business_hours: "24/7 (bot) + horário comercial (humano)"
+  
+# ============================================
+# FLUXO CONVERSACIONAL
+# ============================================
+conversation_flow:
+  
+  # ETAPA 1: BOAS-VINDAS E APRESENTAÇÃO
+  - step: "welcome"
+    id: "001"
+    trigger: "primeira mensagem do usuário"
+    messages:
+      - text: |
+          Olá! 👋 Seja bem-vindo(a)!
+          
+          Sou a **Jul.IA**, assistente virtual do escritório de advocacia especializado em **Direito do Consumidor** e **Revisão de Empréstimos Bancários**.
+          
+          Estou aqui para ajudar você a entender se tem direito a revisar seu empréstimo e recuperar valores pagos indevidamente. 
+          
+          Posso fazer algumas perguntas para entender melhor sua situação?
+    buttons:
+      - id: "sim_continuar"
+        label: "Sim, vamos lá!"
+      - id: "nao_agora"
+        label: "Não, obrigado"
+      - id: "falar_humano"
+        label: "Falar com advogado"
+    next_step:
+      sim_continuar: "002"
+      nao_agora: "099"
+      falar_humano: "098"
+  
+  # ETAPA 2: IDENTIFICAÇÃO DO USUÁRIO - NOME
+  - step: "get_name"
+    id: "002"
+    messages:
+      - text: "Perfeito! Para começar, qual é o seu **nome completo**?"
+    input_type: "text"
+    validation: "nome_completo"
+    save_to: "cliente_nome"
+    next_step: "003"
+  
+  # ETAPA 3: IDENTIFICAÇÃO - EMAIL
+  - step: "get_email"
+    id: "003"
+    messages:
+      - text: "Obrigada, {{cliente_nome}}! 😊\n\nAgora, qual é o seu **e-mail**?"
+    input_type: "text"
+    validation: "email"
+    save_to: "cliente_email"
+    next_step: "004"
+  
+  # ETAPA 4: IDENTIFICAÇÃO - WHATSAPP
+  - step: "get_whatsapp"
+    id: "004"
+    messages:
+      - text: "Ótimo! Confirme seu número de **WhatsApp** para contato:\n\nÉ este número: {{phone_number}}?"
+    buttons:
+      - id: "sim_whatsapp"
+        label: "Sim, está correto"
+      - id: "nao_whatsapp"
+        label: "Não, outro número"
+    next_step:
+      sim_whatsapp: "005"
+      nao_whatsapp: "004a"
+  
+  - step: "get_whatsapp_manual"
+    id: "004a"
+    messages:
+      - text: "Por favor, digite o número de WhatsApp correto (com DDD):"
+    input_type: "text"
+    validation: "telefone"
+    save_to: "cliente_whatsapp"
+    next_step: "005"
+  
+  # ETAPA 5: TIPO DE EMPRÉSTIMO
+  - step: "loan_type"
+    id: "005"
+    messages:
+      - text: |
+          Agora vamos falar sobre seu empréstimo. 💰
+          
+          Você possui ou possuiu algum **empréstimo consignado**?
+          
+          _(Empréstimo consignado é aquele descontado diretamente da folha de pagamento ou benefício do INSS)_
+    buttons:
+      - id: "sim_consignado"
+        label: "Sim, consignado"
+      - id: "nao_consignado"
+        label: "Não, outro tipo"
+      - id: "nao_sei"
+        label: "Não sei"
+    next_step:
+      sim_consignado: "006"
+      nao_consignado: "020"
+      nao_sei: "005a"
+  
+  - step: "explain_consignado"
+    id: "005a"
+    messages:
+      - text: |
+          Sem problemas! Vou explicar:
+          
+          **Empréstimo Consignado** é aquele em que as parcelas são descontadas **automaticamente** do seu salário, aposentadoria ou benefício do INSS.
+          
+          Você se lembra se as parcelas eram descontadas direto da sua folha de pagamento?
+    buttons:
+      - id: "sim_desconto_folha"
+        label: "Sim, era descontado"
+      - id: "nao_desconto_folha"
+        label: "Não, eu pagava"
+      - id: "ainda_nao_sei"
+        label: "Ainda não sei"
+    next_step:
+      sim_desconto_folha: "006"
+      nao_desconto_folha: "020"
+      ainda_nao_sei: "098"
+  
+  # ETAPA 6: STATUS DO EMPRÉSTIMO CONSIGNADO
+  - step: "loan_status"
+    id: "006"
+    messages:
+      - text: "Entendi! E esse empréstimo consignado está:"
+    buttons:
+      - id: "ativo"
+        label: "Ativo (ainda pagando)"
+      - id: "encerrado"
+        label: "Encerrado (já paguei tudo)"
+      - id: "refinanciado"
+        label: "Refinanciado (mata-mata)"
+    next_step:
+      ativo: "007"
+      encerrado: "007"
+      refinanciado: "007"
+  
+  # ETAPA 7: BANCO DO EMPRÉSTIMO
+  - step: "bank_name"
+    id: "007"
+    messages:
+      - text: "Qual é o **banco** do seu empréstimo consignado?"
+    input_type: "text"
+    validation: "texto"
+    save_to: "banco_nome"
+    next_step: "008"
+  
+  # ETAPA 8: VALOR DAS PARCELAS
+  - step: "installment_value"
+    id: "008"
+    messages:
+      - text: "Qual é o **valor aproximado das parcelas** que você paga/pagava?"
+    input_type: "text"
+    validation: "valor_monetario"
+    save_to: "valor_parcela"
+    next_step: "009"
+  
+  # ETAPA 9: NÚMERO DE PARCELAS
+  - step: "installment_count"
+    id: "009"
+    messages:
+      - text: "Quantas **parcelas** ao todo você contratou?"
+    input_type: "text"
+    validation: "numero"
+    save_to: "numero_parcelas"
+    next_step: "010"
+  
+  # ETAPA 10: PERÍODO DO CONTRATO
+  - step: "contract_period"
+    id: "010"
+    messages:
+      - text: "Quando você **contratou** esse empréstimo? (mês e ano aproximados)"
+    input_type: "text"
+    validation: "data_aproximada"
+    save_to: "periodo_contrato"
+    next_step: "011"
+  
+  # ETAPA 11: NÚMERO DO CONTRATO
+  - step: "contract_number"
+    id: "011"
+    messages:
+      - text: |
+          Você tem em mãos o **número do contrato** ou algum documento do empréstimo?
+          
+          Se tiver, pode me enviar o número ou uma foto do documento. Se não tiver, sem problemas!
+    buttons:
+      - id: "tenho_contrato"
+        label: "Tenho o número"
+      - id: "nao_tenho"
+        label: "Não tenho agora"
+    next_step:
+      tenho_contrato: "011a"
+      nao_tenho: "012"
+  
+  - step: "save_contract_number"
+    id: "011a"
+    messages:
+      - text: "Ótimo! Por favor, envie o **número do contrato** ou uma **foto do documento**:"
+    input_type: "text_or_image"
+    save_to: "numero_contrato"
+    next_step: "012"
+  
+  # ETAPA 12: ANÁLISE E QUALIFICAÇÃO
+  - step: "qualification_analysis"
+    id: "012"
+    messages:
+      - text: |
+          Perfeito, {{cliente_nome}}! 📋
+          
+          Estou analisando as informações que você me passou...
+          
+          _(processando)_
+    action: "analyze_qualification"
+    next_step: "013"
+  
+  # ETAPA 13: RESULTADO POSITIVO - CASO QUALIFICADO
+  - step: "qualified_positive"
+    id: "013"
+    condition: "caso_qualificado == true"
+    messages:
+      - text: |
+          ✅ **Ótima notícia!**
+          
+          Com base nas informações fornecidas, identificamos que você **pode ter direito** à revisão do seu empréstimo consignado!
+          
+          Muitos clientes conseguem:
+          • Reduzir o valor das parcelas
+          • Recuperar valores pagos indevidamente
+          • Cancelar juros abusivos
+          • Obter devolução de taxas indevidas
+          
+          **O que você gostaria de fazer agora?**
+    buttons:
+      - id: "agendar_atendimento"
+        label: "Agendar atendimento"
+      - id: "enviar_documentos"
+        label: "Enviar documentos agora"
+      - id: "mais_informacoes"
+        label: "Quero mais informações"
+    next_step:
+      agendar_atendimento: "014"
+      enviar_documentos: "015"
+      mais_informacoes: "016"
+  
+  # ETAPA 14: AGENDAMENTO DE ATENDIMENTO
+  - step: "schedule_appointment"
+    id: "014"
+    messages:
+      - text: |
+          Perfeito! Vou agendar um atendimento com nosso advogado especializado. 📅
+          
+          Qual **dia e horário** seria melhor para você?
+          
+          Nosso horário de atendimento é de segunda a sexta, das 9h às 18h.
+    input_type: "text"
+    save_to: "preferencia_agendamento"
+    action: "create_appointment_request"
+    next_step: "014a"
+  
+  - step: "appointment_confirmation"
+    id: "014a"
+    messages:
+      - text: |
+          ✅ **Agendamento registrado!**
+          
+          Nosso advogado entrará em contato com você em breve para confirmar o horário.
+          
+          Enquanto isso, você pode já ir **separando os documentos** do seu empréstimo (contrato, extratos, comprovantes de pagamento).
+          
+          Você também receberá um link para preencher uma ficha mais detalhada. Tudo bem?
+    buttons:
+      - id: "ok_aguardar"
+        label: "Ok, vou aguardar"
+      - id: "enviar_docs_agora"
+        label: "Enviar documentos agora"
+    next_step:
+      ok_aguardar: "097"
+      enviar_docs_agora: "015"
+  
+  # ETAPA 15: ENVIO DE DOCUMENTOS E PROCURAÇÃO
+  - step: "send_documents"
+    id: "015"
+    messages:
+      - text: |
+          Excelente! Para agilizar seu atendimento, vou enviar um **link** onde você pode:
+          
+          ✅ Preencher seus dados completos
+          ✅ Fazer upload dos documentos do empréstimo
+          ✅ Assinar a procuração digitalmente (via ZapSign)
+          
+          Tudo de forma **rápida, segura e online**!
+          
+          Vou enviar o link agora. Ok?
+    buttons:
+      - id: "sim_enviar_link"
+        label: "Sim, pode enviar!"
+    action: "generate_client_form_link"
+    next_step: "015a"
+  
+  - step: "send_form_link"
+    id: "015a"
+    messages:
+      - text: |
+          📎 **Link do formulário:**
+          {{form_link}}
+          
+          Preencha com calma e, se tiver dúvidas, é só me chamar!
+          
+          Após preencher, você receberá a procuração para assinar digitalmente pelo ZapSign.
+          
+          ⚠️ **Importante:** Ao preencher o formulário e assinar a procuração, você autoriza nosso escritório a analisar seu contrato bancário e representá-lo judicialmente, se necessário.
+    action: "send_form_link_whatsapp"
+    next_step: "097"
+  
+  # ETAPA 16: MAIS INFORMAÇÕES SOBRE O SERVIÇO
+  - step: "more_info"
+    id: "016"
+    messages:
+      - text: |
+          Claro! Vou explicar melhor sobre nosso serviço de **Revisão de Empréstimos Consignados**:
+          
+          **O que é?**
+          É a análise do seu contrato de empréstimo para identificar cobranças indevidas, juros abusivos, taxas ilegais e outras irregularidades.
+          
+          **Quando é cabível?**
+          • Empréstimos consignados com juros acima do permitido
+          • Cobranças de taxas não autorizadas
+          • Refinanciamentos ("mata-mata") sem seu consentimento
+          • Descontos indevidos na folha de pagamento
+          
+          **O que você precisa?**
+          • Contrato do empréstimo
+          • Extratos bancários
+          • Comprovantes de pagamento
+          • Documento de identidade e CPF
+          
+          **Quanto custa?**
+          Trabalhamos com **honorários de êxito**: você só paga se ganharmos a causa! 
+          
+          Nosso percentual é acordado no contrato de honorários.
+          
+          **Quanto tempo demora?**
+          A análise inicial leva de 3 a 5 dias úteis. O processo judicial pode levar de 6 meses a 2 anos, dependendo do caso.
+          
+          Ficou mais claro? O que você gostaria de fazer agora?
+    buttons:
+      - id: "agendar_pos_info"
+        label: "Agendar atendimento"
+      - id: "enviar_docs_pos_info"
+        label: "Enviar documentos"
+      - id: "falar_advogado_pos_info"
+        label: "Falar com advogado"
+    next_step:
+      agendar_pos_info: "014"
+      enviar_docs_pos_info: "015"
+      falar_advogado_pos_info: "098"
+  
+  # ETAPA 20: EMPRÉSTIMO NÃO CONSIGNADO
+  - step: "non_consigned_loan"
+    id: "020"
+    messages:
+      - text: |
+          Entendi! Você mencionou que seu empréstimo **não é consignado**.
+          
+          Nosso escritório é especializado principalmente em **empréstimos consignados**, mas também atendemos outros casos de direito do consumidor.
+          
+          Qual tipo de empréstimo ou problema você tem?
+    input_type: "text"
+    save_to: "tipo_problema"
+    next_step: "021"
+  
+  - step: "analyze_other_case"
+    id: "021"
+    messages:
+      - text: |
+          Obrigada pelas informações, {{cliente_nome}}!
+          
+          Vou encaminhar seu caso para um de nossos advogados analisar se podemos ajudar.
+          
+          Um advogado entrará em contato com você em breve pelo WhatsApp ou e-mail.
+          
+          Enquanto isso, se tiver documentos relacionados ao seu caso, pode já ir separando!
+    action: "forward_to_human_specialist"
+    next_step: "097"
+  
+  # ETAPA 97: FINALIZAÇÃO COM SUCESSO
+  - step: "success_end"
+    id: "097"
+    messages:
+      - text: |
+          🎉 **Tudo certo!**
+          
+          Suas informações foram registradas e em breve você terá retorno da nossa equipe.
+          
+          Se precisar de algo, é só me chamar novamente!
+          
+          **Escritório de Advocacia - Direito do Consumidor**
+          📧 juliano@garbuggio.com.br
+          📱 WhatsApp: (número do escritório)
+          
+          Tenha um ótimo dia! 😊
+    action: "save_lead_success"
+    end_conversation: true
+  
+  # ETAPA 98: ENCAMINHAR PARA ATENDIMENTO HUMANO
+  - step: "forward_to_human"
+    id: "098"
+    messages:
+      - text: |
+          Sem problemas! Vou encaminhar você para um **atendimento humano** com nosso advogado ou assistente.
+          
+          Aguarde um momento, alguém da equipe entrará em contato com você em breve!
+          
+          📱 Se preferir, você também pode ligar diretamente para nosso escritório.
+    action: "notify_human_agent"
+    save_to: "atendimento_humano_solicitado"
+    next_step: "097"
+  
+  # ETAPA 99: USUÁRIO NÃO QUER CONTINUAR
+  - step: "user_declined"
+    id: "099"
+    messages:
+      - text: |
+          Sem problemas! Entendo perfeitamente.
+          
+          Se mudar de ideia ou tiver dúvidas sobre **revisão de empréstimos** ou **direito do consumidor**, é só me chamar novamente!
+          
+          Estou sempre por aqui. 😊
+          
+          Tenha um ótimo dia!
+    action: "save_lead_declined"
+    end_conversation: true
+
+# ============================================
+# CONSENTIMENTOS E LGPD
+# ============================================
+consent_messages:
+  lgpd_initial:
+    text: |
+      ⚠️ **Proteção de Dados Pessoais (LGPD)**
+      
+      Ao continuar esta conversa e fornecer seus dados, você autoriza o escritório de advocacia a coletar, armazenar e processar suas informações pessoais exclusivamente para:
+      
+      ✅ Análise de viabilidade do seu caso
+      ✅ Comunicação sobre serviços jurídicos
+      ✅ Elaboração de documentos e procurações
+      ✅ Representação jurídica, se contratado
+      
+      Seus dados serão tratados com total confidencialidade e segurança, conforme a Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018).
+      
+      Você concorda com estes termos?
+    buttons:
+      - id: "aceito_lgpd"
+        label: "Sim, concordo"
+      - id: "nao_aceito_lgpd"
+        label: "Não concordo"
+  
+  contract_analysis_consent:
+    text: |
+      📄 **Autorização para Análise de Contrato Bancário**
+      
+      Para prosseguir com a análise do seu empréstimo, preciso da sua autorização para:
+      
+      ✅ Analisar seu contrato bancário
+      ✅ Solicitar documentos e extratos
+      ✅ Verificar cobranças e taxas
+      ✅ Identificar possíveis irregularidades
+      
+      Você autoriza a análise do seu contrato bancário?
+    buttons:
+      - id: "autorizo_analise"
+        label: "Sim, autorizo"
+      - id: "nao_autorizo"
+        label: "Não autorizo"
+
+# ============================================
+# MAPEAMENTO DE DADOS CAPTURADOS
+# ============================================
+data_schema:
+  lead:
+    cliente_nome: "string"
+    cliente_email: "string"
+    cliente_whatsapp: "string"
+    banco_nome: "string"
+    tipo_emprestimo: "string" # consignado, pessoal, cartao, etc
+    status_emprestimo: "string" # ativo, encerrado, refinanciado
+    valor_parcela: "decimal"
+    numero_parcelas: "integer"
+    periodo_contrato: "string"
+    numero_contrato: "string"
+    tipo_problema: "string"
+    caso_qualificado: "boolean"
+    atendimento_humano_solicitado: "boolean"
+    preferencia_agendamento: "string"
+    consentimento_lgpd: "boolean"
+    consentimento_analise_contrato: "boolean"
+    data_primeiro_contato: "datetime"
+    data_ultima_interacao: "datetime"
+    status_lead: "string" # novo, qualificado, agendado, documentos_enviados, convertido, perdido
+    origem: "string" # whatsapp_bot
+    
+# ============================================
+# REGRAS DE QUALIFICAÇÃO
+# ============================================
+qualification_rules:
+  positive_criteria:
+    - tipo_emprestimo: "consignado"
+    - status_emprestimo: ["ativo", "encerrado", "refinanciado"]
+    - valor_parcela: "> 0"
+    - numero_parcelas: "> 0"
+  
+  negative_criteria:
+    - tipo_emprestimo: "nao_consignado"
+    - informacoes_insuficientes: true
+  
+  forward_to_human:
+    - caso_complexo: true
+    - duvidas_persistentes: true
+    - solicitacao_explicita: true
+    - fora_do_escopo: true
+
+# ============================================
+# INTEGRAÇÕES
+# ============================================
+integrations:
+  zapi:
+    send_message: "POST /send-text"
+    send_button: "POST /send-button"
+    send_document: "POST /send-document"
+    webhook: "POST /api/webhooks/zapi"
+  
+  zapsign:
+    create_document: "POST /api/v1/documents"
+    send_for_signature: "POST /api/v1/documents/{id}/send"
+    webhook: "POST /api/webhooks/zapsign"
+  
+  julia_procuracoes:
+    import_client: "POST /api/integration/import-client"
+    export_client: "POST /api/integration/export-client"
+  
+  julia_peticoes:
+    import_client: "POST /api/integration/import-client"
+  
+  julia_agenda:
+    create_appointment: "POST /api/appointments"
+    notify_team: "POST /api/notifications"
+
+# ============================================
+# RELATÓRIOS E MÉTRICAS
+# ============================================
+reports:
+  leads_qualified:
+    description: "Número de leads qualificados por período"
+    fields: ["data", "total_leads", "leads_qualificados", "taxa_qualificacao"]
+  
+  human_handoff:
+    description: "Casos encaminhados para atendimento humano"
+    fields: ["data", "total_encaminhamentos", "motivo", "status_atendimento"]
+  
+  conversion_funnel:
+    description: "Funil de conversão do chatbot"
+    stages:
+      - "iniciou_conversa"
+      - "forneceu_dados_pessoais"
+      - "qualificado_positivo"
+      - "agendou_atendimento"
+      - "enviou_documentos"
+      - "assinou_procuracao"
+      - "convertido_cliente"
+  
+  export_formats:
+    - "CSV"
+    - "JSON"
+    - "Excel"

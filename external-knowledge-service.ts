@@ -5,7 +5,7 @@
  * conhecimentos relevantes que serão usados pela IA nas respostas.
  */
 
-const KNOWLEDGE_BASE_API_URL = process.env.KNOWLEDGE_BASE_API_URL || "https://3000-i14s08bjijoom0p3n95os-b37fc93e.manusvm.computer";
+const KNOWLEDGE_BASE_API_URL = process.env.KNOWLEDGE_BASE_API_URL || "https://3000-i8ecmcu85ng5j410qc23p-341d1e34.manusvm.computer";
 
 interface ExternalKnowledge {
   id: number;

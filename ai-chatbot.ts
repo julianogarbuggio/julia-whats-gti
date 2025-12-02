@@ -60,9 +60,9 @@ interface AIResponse {
 }
 
 /**
- * Busca conhecimento relevante na base de dados
+ * Busca conhecimento relevante na base de dados LOCAL
  */
-async function searchKnowledge(query: string, limit: number = 5): Promise<any[]> {
+async function searchLocalKnowledge(query: string, limit: number = 5): Promise<any[]> {
   const db = await getDb();
   if (!db) return [];
   
@@ -98,8 +98,37 @@ async function searchKnowledge(query: string, limit: number = 5): Promise<any[]>
     
     return relevant.slice(0, limit);
   } catch (error) {
-    console.error("[AI] Error searching knowledge:", error);
+    console.error("[AI] Error searching local knowledge:", error);
     return [];
+  }
+}
+
+/**
+ * Busca conhecimento relevante - INTEGRADO com Base de Conhecimento Externa
+ * 
+ * Esta função primeiro tenta buscar na Base de Conhecimento Externa (jul.IA Knowledge Base).
+ * Se a base externa não estiver disponível ou não retornar resultados, faz fallback para a base local.
+ */
+async function searchKnowledge(query: string, limit: number = 5): Promise<any[]> {
+  try {
+    // Importar serviço de conhecimento externo
+    const { searchExternalKnowledge } = await import("./external-knowledge-service");
+    
+    // Tentar buscar na base externa primeiro
+    const externalKnowledge = await searchExternalKnowledge(query, limit);
+    
+    if (externalKnowledge && externalKnowledge.length > 0) {
+      console.log(`[AI] Usando ${externalKnowledge.length} conhecimentos da Base Externa`);
+      return externalKnowledge;
+    }
+    
+    // Fallback: buscar na base local se externa não retornou resultados
+    console.log("[AI] Base Externa sem resultados, usando base local");
+    return await searchLocalKnowledge(query, limit);
+  } catch (error) {
+    console.error("[AI] Erro ao buscar conhecimento externo, usando base local:", error);
+    // Fallback: em caso de erro, usar base local
+    return await searchLocalKnowledge(query, limit);
   }
 }
 
